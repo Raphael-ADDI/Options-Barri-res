@@ -1,10 +1,330 @@
-\documentclass{article}
+\documentclass[12pt]{article}
+
+
+% =========================
+% Packages
+% =========================
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm,bbm,stmaryrd}
+%\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage[font=small,labelfont=bf]{caption}
+
+% =========================
+% Notation
+% =========================
 \usepackage[utf8]{inputenc}
-\title{Projet Collaboratif}
-\author{L'équipe}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\1}{\mathbbm{1}}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\ee}{\mathrm{e}}
+\newcommand{\Ito}{It\^o}
+\newcommand{\F}{\mathcal{F}}
+
+% =========================
+% Theorem environments
+% =========================
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Configuration du style Python pour le code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    language=Python,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
 \begin{document}
-\maketitle
-Bonjour ! Ceci est notre document partagé.
-Prout Peout je fais un test
-Prout prout je test encore
+
+% =========================
+% Page de Garde
+% =========================
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Huge \bfseries Stochastic Calculus and Barrier Options: A Black-Scholes Extension \par}
+    \vspace{2cm}
+    {\large \textbf{By Addi Raphaël, Oster Eliott and Tirard Thomas} \par}
+    \vspace{0.5cm}
+    {\textit{INSA Toulouse — GMM Department (4th year)}} \par
+    \vspace{1.5cm}
+    {\large \textit{Supervisor: Aldéric Joulin}} \par
+    \vspace{1.5cm}
+    \vfill
+    {\large Academic year 2025-2026 \par}
+\end{titlepage}
+
+% Page blanche après la garde
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+% Abstract
+\newpage
+\thispagestyle{empty}
+\begin{abstract}
+This report presents the Black-Scholes framework and its extension to path-dependent derivatives. Starting from the properties of Brownian motion, we introduce the essential tools of stochastic calculus, including Girsanov's theorem for the change of measure and the resulting risk-neutral valuation. We derive the Black-Scholes PDE and its closed-form solution for European options, demonstrating the equivalence between replication-based and probabilistic approaches. A significant focus is placed on the Reflection Principle, which allows for the joint distribution of the Brownian motion and its running maximum. These techniques are then applied to the pricing of barrier options, where we recalculate the conditional expectations and establish the specific boundary conditions for the underlying PDE. Finally, we provide explicit formulas for knock-in and knock-out contracts, illustrating the robust connection between martingale theory and exotic option pricing.
+\end{abstract}
+
+
+% Page blanche après l'abstract
+\newpage  
+\thispagestyle{empty}
+\mbox{}
+
+\newpage
+\tableofcontents
+\newpage
+
+\setcounter{page}{5}
+\onehalfspacing
+
+
+
+\section{Introduction}
+
+The mathematical framework established by Black, Scholes, and Merton relies on the fundamental properties of Brownian motion. However, as financial models evolved to address more complex market dynamics and exotic derivatives, the need for advanced stochastic tools became paramount. Central to this evolution is the ability to transition between different probability measures, a concept formalized by the \textit{Girsanov Theorem}. Developed by \textit{Igor Girsanov} in 1960, this theorem provides the necessary conditions for changing the drift of a stochastic process while maintaining its distribution under a new equivalent martingale measure. In modern quantitative finance, Girsanov's theorem is the cornerstone of risk-neutral pricing, allowing for the valuation of assets in a world where all discounted price processes are martingales.
+
+\medskip
+
+While standard European options depend only on the terminal value of the underlying asset, many contemporary financial instruments are path-dependent. Among these, \textit{barrier options} are particularly significant; their payoff is contingent on whether the asset price crosses a pre-specified level (the barrier) during the option's lifetime. The valuation of such instruments requires a deep understanding of the extremum of Brownian motion. A vital analytical tool for this purpose is the \textit{Reflection Principle}, rooted in the symmetry of the Wiener process. By leveraging the reflection principle, one can derive the joint distribution of a Brownian motion and its running maximum, which is essential for calculating the "knock-in" or "knock-out" probabilities inherent in barrier contracts.
+
+\medskip
+
+This project aims to bridge the gap between pure stochastic theory and its practical application in financial engineering. We will explore the rigorous construction of the Girsanov transformation and the geometric intuition behind the reflection principle. Finally, we will demonstrate how these theoretical pillars converge to provide closed-form solutions for the pricing of barrier options, illustrating the enduring power of stochastic calculus in navigating the complexities of modern systematic trading and derivative valuation.
+
+\section{Brownian motion and Girsanov's theorem}
+This section details the fundamental properties of Brownian motion and the Girsanov theorem, which allows for the change of probability measures in stochastic modeling
+
+\subsection{Properties and Martingales of Brownian Motion}
+
+\subsubsection{Standard Brownian Motion}
+
+\begin{definition}
+A real-valued stochastic process $(B_t)_{t\ge 0}$ is a \textbf{standard Brownian motion} if:
+\begin{enumerate}
+    \item $B_0 = 0$ a.s. and the paths $t\mapsto B_t$ are almost surely continuous;
+    \item $(B_t)_{t\ge 0}$ is a centered Gaussian process with $\Cov(B_s,B_t)=\min(s,t)$.
+\end{enumerate}
+\end{definition}
+
+This covariance structure implies $\Var(B_t)=t$. While $(B_t)$ is the continuous limit of a random walk, it is uniquely characterized by having independent and stationary increments: for $0\le s < t$, $B_t - B_s \sim \mathcal{N}(0, t-s)$ and is independent of $\F_s \coloneqq \sigma(B_u : u \le s)$.
+
+\medskip
+
+\noindent\textbf{Joint Density.} For $0 < s < t$, $(B_s, B_t)$ is a Gaussian vector with mean $\mathbf{0}$ and covariance $\Sigma = \begin{psmallmatrix} s & s \\ s & t \end{psmallmatrix}$. With $\det(\Sigma) = s(t-s)$, its joint density is:
+\begin{equation}\label{eq:joint-density}
+f_{(B_s,B_t)}(x,y) = \frac{1}{2\pi \sqrt{s(t-s)}} \exp\left( -\frac{1}{2} \left[ \frac{x^2}{s} + \frac{(y-x)^2}{t-s} \right] \right).
+\end{equation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{MB.png}
+    \caption{Numerical simulation of Brownian motion paths.}
+    \label{fig:brownian-motion}
+\end{figure}
+
+\subsubsection{Fundamental Brownian Martingales}
+
+Martingales are the primary tools for risk-neutral valuation. Let $\F_t$ be the natural filtration of $B$. We identify three fundamental $(\F_t, \PP)$-martingales:
+
+\begin{enumerate}
+    \item \textbf{Brownian Motion:} $(B_t)_{t\ge 0}$ is a martingale. 
+    Using $B_t = B_s + (B_t - B_s)$, the independence and centered nature of increments yield $\E[B_t \mid \F_s] = B_s + \E[B_t - B_s] = B_s$.
+    
+    \item \textbf{Quadratic Martingale:} $(B_t^2 - t)_{t\ge 0}$ is a martingale. 
+    Expanding $B_t^2 = (B_s + (B_t-B_s))^2$ and taking the conditional expectation:
+    \[ \E[B_t^2 \mid \F_s] = B_s^2 + 2B_s\E[B_t-B_s] + \E[(B_t-B_s)^2] = B_s^2 + (t-s). \]
+    Subtracting $t$ on both sides recovers the martingale property.
+    
+    \item \textbf{Exponential Martingale:} For $\theta \in \R$, $M_t^\theta \coloneqq \exp(\theta B_t - \frac{1}{2}\theta^2 t)$ is a martingale. 
+    Defining $X = B_t - B_s \sim \mathcal{N}(0, t-s)$, we use the Gaussian moment generating function $\E[e^{\theta X}] = e^{\frac{1}{2}\theta^2(t-s)}$:
+    \[ \E[M_t^\theta \mid \F_s] = M_s^\theta \cdot e^{-\frac{1}{2}\theta^2(t-s)} \E[e^{\theta(B_t-B_s)} \mid \F_s] = M_s^\theta \cdot e^{-\frac{1}{2}\theta^2(t-s)} e^{\frac{1}{2}\theta^2(t-s)} = M_s^\theta. \]
+\end{enumerate}
+\qed
+
+\subsection{Girsanov's Theorem and Change of Measure}
+
+To transition from a physical description of price dynamics to a risk-neutral pricing framework, we require a mechanism to modify the drift of a process while preserving its Brownian structure. This is achieved through a change of probability measure.
+
+\subsubsection{The Radon-Nikodym Process}
+
+Let $(\F_t)_{t\in[0,T]}$ be the natural filtration. We define a new probability measure $\mathbb{Q}$ equivalent to $\mathbb{P}$ on $\F_T$ via the density $Z_T = \frac{\dd \mathbb{Q}}{\dd \mathbb{P}}$. For any $\F_t$-measurable random variable $L_t$, the expectation under $\mathbb{Q}$ is related to $\mathbb{P}$ by:
+\[
+\mathbb{E}_{\mathbb{Q}}[L_t] = \mathbb{E}_{\mathbb{P}}[L_t Z_T] = \mathbb{E}_{\mathbb{P}}\left[ \mathbb{E}_{\mathbb{P}}[ L_t Z_T \mid \F_t ] \right] = \mathbb{E}_{\mathbb{P}}[ L_t Z_t ],
+\]
+where $Z_t = \E_{\mathbb{P}}[Z_T \mid \F_t]$ is the density process. If we define $Z$ as a stochastic exponential of the form $\dd Z_t = Z_t u_t \dd B_t$, then $Z$ is a $\PP$-martingale:
+\[
+Z_t = \exp\left( \int_0^t u_s \,\dd B_s - \frac{1}{2} \int_0^t u_s^2 \,\dd s \right).
+\]
+
+\subsubsection{Girsanov's Theorem}
+
+The following theorem formalizes how the drift of a Brownian motion is transformed under the measure $\mathbb{Q}$ induced by the density process $Z_t$.
+
+\begin{theorem}[Girsanov]
+Let $(B_t)_{t\ge 0}$ be a standard Brownian motion under $\PP$ and $(u_t)_{t\ge 0}$ an adapted process. Define the process $(\widetilde{B}_t)_{t\ge 0}$ by:
+\begin{equation}
+\widetilde{B}_t \coloneqq B_t - \int_0^t u_s\,\dd s.
+\end{equation}
+Then, under the probability measure $\mathbb{Q}$ defined by the Radon-Nikodym derivative 
+$\left. \frac{\dd \mathbb{Q}}{\dd \mathbb{P}} \right|_{\F_t} = Z_t$,
+the process $(\widetilde{B}_t)_{t \ge 0}$ is a standard Brownian motion.
+\end{theorem}
+
+This result is fundamental in finance: it allows us to "absorb" the drift of an asset price into the Brownian motion by shifting to a measure $\mathbb{Q}$ where the discounted asset becomes a martingale.
+
+\section{The Black-Scholes Framework}
+
+The primary objective of this section is to synthesize the probabilistic tools previously introduced—specifically Brownian motion, martingales, and Girsanov's theorem—to derive the Black-Scholes pricing framework. We bridge the gap between stochastic dynamics and the valuation of contingent claims through the risk-neutral measure and the resulting Partial Differential Equation (PDE).
+
+\subsection{Market Dynamics and Risk-Neutral Valuation}
+
+\subsubsection{Asset Dynamics and Stochastic Perturbation}
+
+In the Black-Scholes model, the evolution of a risky asset price $(X_t)_{t\ge 0}$ is governed by a Geometric Brownian Motion (GBM), expressed as the following Stochastic Differential Equation (SDE):
+\begin{equation}\label{eq:sde-general}
+\dd X_t = \mu X_t \dd t + \sigma X_t \dd B_t,
+\end{equation}
+where $\mu\in\R$ represents the drift and $\sigma>0$ is the volatility. Formally, setting $\sigma = 0$ reduces the model to a deterministic ODE with the solution $X_t = X_0 e^{\mu t}$. The SDE \eqref{eq:sde-general} thus interprets market movements as a deterministic trend perturbed by continuous random noise, capturing the inherent uncertainty of price fluctuations.
+
+\subsubsection{The Risk-Neutral Measure $\mathbb{Q}$}
+
+A central tenet of arbitrage pricing theory is the existence of an equivalent martingale measure $\mathbb{Q}$ under which the discounted asset price is a martingale. By applying Girsanov’s theorem with the kernel $u_t = \frac{\mu - r}{\sigma}$, we transition from the physical measure $\mathbb{P}$ to the risk-neutral measure $\mathbb{Q}$. Under $\mathbb{Q}$, the asset dynamics become:
+\begin{equation}\label{eq:bs-risk-neutral}
+\dd X_t = r X_t \dd t + \sigma X_t \dd \widetilde{B}_t,
+\end{equation}
+where $r$ is the risk-free rate and $\widetilde{B}_t$ is a $\mathbb{Q}$-Brownian motion. This transformation is crucial as it ensures that the fair price of any derivative is independent of the investor's risk preference (represented by $\mu$).
+
+\subsubsection{Option Payoff and Pricing Functional}
+
+We consider a European call option with maturity $T>0$ and strike price $K>0$. Its payoff at maturity is $g(X_T) = (X_T-K)^+$. The fair value of this claim at time $t \in [0,T]$, given $X_t=x$, is defined by the discounted conditional expectation under $\mathbb{Q}$:
+\begin{equation}\label{eq:g-def}
+V(t,x) \coloneqq e^{-r(T-t)}\,\mathbb{E}^{\mathbb{Q}}\!\left[\,(X_T-K)^+\,\middle|\, X_t=x\right].
+\end{equation}
+The following subsections will demonstrate how this probabilistic representation leads to the Black-Scholes PDE and the explicit pricing formula.
+
+\subsection{Derivation of the Black--Scholes PDE by Replication}\label{sec:bs-pde-replication}
+
+In this section, we derive the Black--Scholes partial differential equation (PDE) using a replication argument. The key idea is to construct a self-financing portfolio that replicates the payoff of a European claim. By absence of arbitrage, the replicating portfolio must earn the risk-free rate once the stochastic risk has been hedged away.
+
+\subsubsection{Dynamics and It\^o's Expansion}
+
+Assume that under the physical measure $\PP$ the risky asset satisfies
+\begin{equation}\label{eq:sde-physical}
+\dd X_t = \mu X_t\,\dd t + \sigma X_t\,\dd B_t, \qquad X_0=x>0.
+\end{equation}
+Let $T>0$ and let $g:\R_+\to\R$ be a payoff function $g(x)=(x-K)^+$. We denote by $V(t,x)$ the time-$t$ value of the claim. We assume that $V\in C^{1,2}([0,T)\times\R_+)$, so that It\^o's lemma applies to the process $V(t,X_t)$.
+
+\medskip
+Throughout this section, subscripts denote partial derivatives: $V_t = \frac{\partial V}{\partial t}$, $V_x = \frac{\partial V}{\partial x}$, and $V_{xx} = \frac{\partial^2 V}{\partial x^2}$. In finance, $V_x$ corresponds to the \emph{Delta} hedge ratio and $V_{xx}$ to the \emph{Gamma}. By It\^o's formula:
+\[
+\dd V(t,X_t) = V_t(t,X_t)\,\dd t +V_x(t,X_t)\,\dd X_t +\frac{1}{2}V_{xx}(t,X_t)\,\dd\langle X,X\rangle_t.
+\]
+Since $\dd\langle X,X\rangle_t = \sigma^2 X_t^2\,\dd t$, we have:
+\begin{equation}\label{eq:dV-ito}
+\dd V(t,X_t) = \Big(V_t+\mu X_t V_x+\tfrac12\sigma^2 X_t^2 V_{xx}\Big)\,\dd t + \sigma X_t V_x\,\dd B_t.
+\end{equation}
+
+\subsubsection{Building the Replicating Portfolio}
+
+Consider a self-financing portfolio holding $\Delta_t$ units of $X_t$. Let $\Pi_t$ be the portfolio value:
+\begin{equation}\label{eq:self-financing}
+\dd\Pi_t=\Delta_t\,\dd X_t + r(\Pi_t-\Delta_t X_t)\,\dd t.
+\end{equation}
+To replicate the claim, we set $\Pi_t = V(t,X_t)$ and choose $\Delta_t \coloneqq V_x(t,X_t)$. Substituting \eqref{eq:sde-physical} into \eqref{eq:self-financing}:
+\begin{equation}\label{eq:dPi}
+\dd\Pi_t = \Big(\mu X_t V_x+r(V-X_t V_x)\Big)\,\dd t + \sigma X_t V_x\,\dd B_t.
+\end{equation}
+
+\subsubsection{The Black--Scholes PDE}
+
+Comparing \eqref{eq:dPi} with \eqref{eq:dV-ito}, the diffusion terms coincide. For the replication to hold, the drifts must also match:
+\[
+\Big(V_t+\mu X_t V_x+\tfrac12\sigma^2 X_t^2 V_{xx}\Big) = \Big(\mu X_t V_x+r(V-X_t V_x)\Big).
+\]
+The $\mu X_t V_x$ terms cancel, yielding the \textbf{Black--Scholes PDE}:
+\begin{equation}\label{eq:bs-pde}
+\boxed{ V_t(t,x)+\frac{1}{2}\sigma^2 x^2 V_{xx}(t,x)+r x V_x(t,x)-rV(t,x)=0 }
+\end{equation}
+with $V(T,x)=g(x)$. Notably, the drift $\mu$ disappears, confirming that prices are determined under risk-neutral valuation.
+
+\subsection{Risk-Neutral Valuation and Explicit Formula}
+
+\subsubsection{Solution of the geometric Brownian motion}
+
+Applying It\^o's formula to $\log X_t$ for \eqref{eq:sde-physical}:
+\[ \dd(\log X_t) = \frac{1}{X_t}\,\dd X_t -\frac{1}{2 X_t^2}\,\dd\langle X,X\rangle_t = \left(\mu-\frac{\sigma^2}{2}\right)\dd t+\sigma\,\dd B_t. \]
+Integrating from $0$ to $t$ yields:
+\begin{equation}\label{eq:gbm-solution}
+X_t=x_0\exp\!\left(\left(\mu-\frac{\sigma^2}{2}\right)t+\sigma B_t\right).
+\end{equation}
+
+\subsubsection{Explicit Derivation of the Black--Scholes Formula}
+
+Under the risk-neutral measure $\mathbb{Q}$, the asset follows $\dd X_t = r X_t \,\dd t + \sigma X_t \,\dd{B}_t$. For a call, the payoff is $(X_T - K)^+ = (X_T - K)\,\mathbf{1}_{\{X_T \ge K\}}$.
+The value at time $0$ is $e^{-rT} \E^{\QQ}[(X_T - K)^+]$, which splits into:
+\[ e^{-rT} \E^{\QQ}[X_T \mathbf{1}_{\{X_T \ge K\}}] - e^{-rT} K\,\QQ(X_T \ge K). \]
+Let $Z = B_T/\sqrt{T} \sim \mathcal{N}(0,1)$. Then $X_T = x_0 \exp((r - \sigma^2/2)T + \sigma \sqrt{T} Z)$. 
+The condition $X_T \ge K$ is equivalent to $Z \ge \frac{\ln(K/x_0) - (r - \sigma^2/2)T}{\sigma\sqrt{T}} = -d_2$. 
+Thus, $\QQ(X_T \ge K) = \Phi(d_2)$.
+
+For the asset term, we compute the expectation:
+\[ \E^{\QQ}[X_T \mathbf{1}_{\{X_T \ge K\}}] = x_0 e^{(r - \sigma^2/2)T} \int_{-d_2}^{+\infty} \frac{1}{\sqrt{2\pi}} e^{\sigma\sqrt{T}x - x^2/2} \dd x. \]
+Completing the square: $\sigma\sqrt{T}x - x^2/2 = -\frac{1}{2}(x - \sigma\sqrt{T})^2 + \frac{1}{2}\sigma^2 T$. Using $y = x - \sigma\sqrt{T}$:
+\[ \E^{\QQ}[X_T \mathbf{1}_{\{X_T \ge K\}}] = x_0 e^{rT} \int_{-d_2 - \sigma\sqrt{T}}^{+\infty} \frac{1}{\sqrt{2\pi}} e^{-y^2/2} \dd y = x_0 e^{rT} \Phi(d_1), \]
+where $d_1 = d_2 + \sigma\sqrt{T} = \frac{\ln(x_0/K) + (r + \sigma^2/2)T}{\sigma\sqrt{T}}$. Discounting back to time $0$:
+\begin{equation}
+\boxed{ C_0 = x_0 \Phi(d_1) - K e^{-rT} \Phi(d_2) }
+\end{equation}
+
+\subsubsection{Probabilistic Representation and Time-Homogeneity}
+
+To compute $V(t,x)$, we rely on the risk-neutral representation. Let $\tau = T-t$ be the time to maturity. We aim to show that $V(t,x)$ depends only on $\tau$ and $x$:
+\[ V(t,x) = e^{-r\tau} \mathbb{E}^{\mathbb{Q}} \left[ (x \mathcal{X}_{\tau} - K)^+ \right]. \]
+Under $\mathbb{Q}$, $X_T = X_t \exp \left( (r - \frac{1}{2}\sigma^2)\tau + \sigma (\tilde{B}_T - \tilde{B}_t) \right)$. By the stationarity and independence of Brownian increments, $(\tilde{B}_T - \tilde{B}_t)$ is independent of $\mathcal{F}_t$ and distributed as $\tilde{B}_{\tau}$. Defining $\mathcal{X}_{\tau} \coloneqq \exp ( (r - \frac{1}{2}\sigma^2)\tau + \sigma \tilde{B}_{\tau} )$, the Markov property of $X_t$ ensures:
+\[ \mathbb{E}^{\mathbb{Q}} \left[ (X_T - K)^+ \mid \mathcal{F}_t \right] = \mathbb{E}^{\mathbb{Q}} \left[ (X_t \mathcal{X}_{\tau} - K)^+ \mid X_t \right]. \]
+Conditioning on $X_t=x$, we confirm $V(t,x) = e^{-r\tau} \mathbb{E}^{\mathbb{Q}} [ (x \mathcal{X}_{\tau} - K)^+ ]$. This time-homogeneity proves that the no-arbitrage price coincides with the unique solution of the Black--Scholes PDE \eqref{eq:bs-pde}, bridging the replication and probabilistic approaches.
+
+
+
+
 \end{document}
