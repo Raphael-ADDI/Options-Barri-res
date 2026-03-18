@@ -1,10 +1,137 @@
-\documentclass{article}
-\usepackage[utf8]{inputenc}
+\documentclass[11pt]{article}
+
+% --- Les Librairies indispensables ---
+\usepackage[utf8]{inputenc}    % Pour les accents
+\usepackage[T1]{fontenc}       % Pour la police
+\usepackage[french]{babel}     % Pour le français (Sommaire, etc.)
+\usepackage{amsmath}           % Pour align*, cases, etc.
+\usepackage{amsfonts}          % Pour \mathbb{E}, \mathbb{P} (les lettres doubles)
+\usepackage{amssymb}           % Pour les symboles mathématiques bonus
+\usepackage{geometry}          % Pour régler les marges proprement
+\geometry{margin=2.5cm}
+
 \title{Projet Collaboratif}
 \author{L'équipe}
 \begin{document}
 \maketitle
-Bonjour ! Ceci est notre document partagé.
-Prout Peout je fais un test
-Prout prout je test encore
+
+\section{Partie Raph : Mouvement Brownien Drifté}
+
+Dans cette section, nous étudions le comportement d'un mouvement brownien avec dérive (drift). Cette étape est cruciale car, contrairement au modèle standard, la dérive rompt la symétrie spatiale, ce qui complique le calcul de la loi du maximum.
+\subsection*{Mouvement Brownien avec dérive (drift)}
+
+En utilisant le théorème de Girsanov, nous allons voir qu'il est possible de calculer la fonction de densité du maximum :
+\begin{equation}
+    \tilde{X}_T = \max_{t\in[0,T]} \tilde{B}_t = \max_{t\in[0,T]} (B_t + \mu t)
+\end{equation}
+du mouvement brownien avec dérive $\tilde{B}_t = B_t + \mu t$, où $\mu \in \mathbb{R}$. En effet, tous les arguments précédemment appliqué sur ${B}_t$ ne pourront pas s'appliquer à $\tilde{B}_t$ car le Brownien drifté n'est plus symétrique dans l'espace quand $\mu \neq 0$
+
+Or, nous savons que $\tilde{B}_t$ est un Brownien standard sous la probabilité $\tilde{P}$ défini par :
+\begin{equation}
+    \frac{d\tilde{\mathbb{P}}}{d\mathbb{P}} = e^{-\mu B_T - \mu^2 T / 2}
+\end{equation}
+
+Dès lors, la densité de $\tilde{X}_T$ sous $\tilde{\mathbb{P}}$ est donnée par l'équation ("On verra le numéro"). Nous allons donc pourvoir calculer sous $\tilde{\mathbb{P}}$ la densité jointe de $\tilde{X}_t$ et $\tilde{B}_t$ :
+\begin{align*}
+    \mathbb{P}(\tilde{X}_T \le a \text{ \& } \tilde{B}_T \le b) &= \mathbb{E} \left[ \mathbf{1}_{\{\tilde{X}_T \le a \text{ \& } \tilde{B}_T \le b\}} \right] \\
+    &= \tilde{\mathbb{E}} \left[ e^{\mu B_T + \mu^2 T / 2} \mathbf{1}_{\{\tilde{X}_T \le a \text{ \& } \tilde{B}_T \le b\}} \right] \\
+    &= \tilde{\mathbb{E}} \left[ e^{\mu \tilde{B}_T - \mu^2 T / 2} \mathbf{1}_{\{\tilde{X}_T \le a \text{ \& } \tilde{B}_T \le b\}} \right] \\
+    &= \sqrt{\frac{2}{\pi T}} \int_0^a \int_{-\infty}^b \mathbf{1}_{[0,x]}(y) e^{\mu y - \mu^2 T / 2} \frac{(2x - y)}{T} e^{-(2x - y)^2 / (2T)} dx dy
+\end{align*} pour $0 \le b \le a$.
+
+Cela nous permet d'obtenir la densité jointe en utilisant la relation suivante :
+\begin{equation}
+    f_{\tilde{X}_T, \tilde{B}_T}(a, b) = \frac{d\mathbb{P}(\tilde{X}_T \le a \text{ \& } \tilde{B}_T \le b)}{da db}
+\end{equation}
+
+
+En développant nous obtenons :
+
+\begin{align*}
+\textit{f}_{\tilde{X}_T, \tilde{B}_T}(a, b) &= \frac{\partial^2}{\partial a \partial b} \left[ \sqrt{\frac{2}{\pi T}} \int_0^a \int_{-\infty}^b \mathbf{1}_{[0,x]}(y) e^{\mu y - \frac{\mu^2 T}{2}} \frac{(2x - y)}{T} e^{-\frac{(2x - y)^2}{2T}} dy dx \right] \\
+&= \frac{\partial}{\partial a} \left[ \sqrt{\frac{2}{\pi T}} \int_0^a \frac{\partial}{\partial b} \left( \int_{-\infty}^b \mathbf{1}_{[0,x]}(y) e^{\mu y - \frac{\mu^2 T}{2}} \frac{(2x - y)}{T} e^{-\frac{(2x - y)^2}{2T}} dy \right) dx \right] \\
+&= \frac{\partial}{\partial a} \left[ \sqrt{\frac{2}{\pi T}} \int_0^a \mathbf{1}_{[0,x]}(b) e^{\mu b - \frac{\mu^2 T}{2}} \frac{(2x - b)}{T} e^{-\frac{(2x - b)^2}{2T}} dx \right] \\
+&= \sqrt{\frac{2}{\pi T}} \mathbf{1}_{[0,a]}(b) e^{\mu b - \frac{\mu^2 T}{2}} \frac{(2a - b)}{T} e^{-\frac{(2a - b)^2}{2T}} \\
+&= \mathbf{1}_{\{a \ge b \wedge 0\}} \frac{1}{T} \sqrt{\frac{2}{\pi T}} (2a - b) \exp \left( \mu b - \frac{\mu^2 T}{2} - \frac{(2a - b)^2}{2T} \right)
+\end{align*}
+
+Nous retrouvons ainsi l'équation :
+
+\begin{equation}
+f_{\tilde{X}_T, \tilde{B}_T}(a, b) = \mathbf{1}_{\{a \ge b \wedge 0\}} \frac{1}{T} \sqrt{\frac{2}{\pi T}} (2a - b) e^{\mu b - \frac{(2a - b)^2}{2T} - \frac{\mu^2 T}{2}}
+\end{equation}
+
+\subsection*{Options Barrières}
+\subsubsection*{Cas Général}
+En utilisant la densité jointe de $\tilde{B}_T$ et $\tilde{X}_T$, nous sommes capables d'évaluer le prix de n'importe quelle option exotique dont le payoff est de la forme $\phi(\tilde{B}_T, \tilde{X}_T)$, par la formule :
+\begin{equation}
+e^{-r(T-t)} \mathbb{E} \left[ \phi(\tilde{X}_T, \tilde{B}_T) \mid \mathcal{F}_t \right],
+\end{equation}
+avec en particulier au temps $t=0$ :
+\begin{equation}
+e^{-rT} \mathbb{E} \left[ \phi(\tilde{X}_T, \tilde{B}_T) \right] = e^{-rT} \int_{-\infty}^{\infty} \int_{y \vee 0}^{\infty} \phi(x, y) d\mathbb{P}(\tilde{X}_T = x, \tilde{B}_T = y).
+\end{equation}
+
+Lorsque le payoff prend la forme :
+\begin{equation}
+C = \phi(M_T, S_T)
+\end{equation}
+où : 
+\begin{center}
+\begin{align*}
+S_T &= S_0 e^{\sigma B_T - \sigma^2 T / 2 + rT} \\
+&= S_0 e^{\sigma \tilde{B}_T},
+\end{align*}
+\end{center}
+avec $\mu = -\sigma/2 + r/\sigma$ et $\tilde{B}_T = B_T + \mu T$, et :
+
+\begin{center}
+\begin{align*}
+M_T &= \max_{t \in [0,T]} S_t  \\
+&= S_0 \max_{t \in [0,T]} e^{\sigma B_t - \sigma^2 t / 2 + rt} \\
+&= S_0 \max_{t \in [0,T]} e^{\sigma \tilde{B}_t}  \\
+&= S_0 e^{\sigma \max_{t \in [0,T]} \tilde{B}_t}  \\
+&= S_0 e^{\sigma \tilde{X}_T},
+\end{align*}
+\end{center}
+
+nous avons :
+\begin{align*}
+C &= \phi(S_T, M_T)  \\
+&= \phi(S_0 e^{\sigma B_T - \sigma^2 T / 2 + rT}, M_T)  \\
+&= \phi(S_0 e^{\sigma \tilde{B}_T}, S_0 e^{\sigma \tilde{X}_T}).
+\end{align*}
+
+\subsubsection*{Up-and-out barrier call option}
+
+Considérons une option d'achat (call) up-and-out de maturité $T$, de prix d'exercice $K$, de barrière $B$, et de payoff :
+
+\begin{align*}
+C &= (S_T - K)^+ \mathbf{1}_{\{ \max_{0 \le t \le T} S_t \le B \}} \\
+&= \begin{cases} 
+S_T - K & \text{si } \max_{0 \le t \le T} S_t \le B, \\
+0 & \text{si } \max_{0 \le t \le T} S_t > B,
+\end{cases}
+\end{align*}
+
+avec $B > K$. Notre objectif est de prouver le résultat suivant.
+
+Le prix : 
+\begin{equation}
+e^{-r(T-t)} \mathbf{1}_{\{M_t \le B\}} \mathbb{E} \left[ \left( x \frac{S_{T-t}}{S_0} - K \right)^+ \mathbf{1}_{\left\{ x \max_{0 \le \tau \le T-t} S_\tau / S_0 \le B \right\}} \right]_{x=S_t}
+\end{equation}
+de l'option up-and-out call de maturité $T$, strike $K$ et barrière $B$ est donné par :
+
+\begin{equation}
+e^{-r(T-t)} \mathbb{E} \left[ C \mid \mathcal{F}_t \right]
+\end{equation}
+\begin{align*}
+&= S_t \mathbf{1}_{\{M_t \le B\}} \left[ \Phi \left( \delta_+^{T-t} \left( \frac{S_t}{K} \right) \right) - \Phi \left( \delta_+^{T-t} \left( \frac{S_t}{B} \right) \right) \right. \\
+&\quad - \left. \left( \frac{B}{S_t} \right)^{1+2r/\sigma^2} \left( \Phi \left( \delta_+^{T-t} \left( \frac{B^2}{KS_t} \right) \right) - \Phi \left( \delta_+^{T-t} \left( \frac{B}{S_t} \right) \right) \right) \right] \\
+&\quad - e^{-r(T-t)} K \mathbf{1}_{\{M_t \le B\}} \left[ \Phi \left( \delta_-^{T-t} \left( \frac{S_t}{K} \right) \right) - \Phi \left( \delta_-^{T-t} \left( \frac{S_t}{B} \right) \right) \right. \\
+&\quad - \left. \left( \frac{S_t}{B} \right)^{1-2r/\sigma^2} \left( \Phi \left( \delta_-^{T-t} \left( \frac{B^2}{KS_t} \right) \right) - \Phi \left( \delta_-^{T-t} \left( \frac{B}{S_t} \right) \right) \right) \right].
+\end{align*}
+
+Notez qu'en prenant $B = +\infty$ dans l'identité (9) ci-dessus, on retrouve la formule de Black-Scholes pour le prix d'une option call européenne.
+
 \end{document}
