@@ -18,7 +18,7 @@
 \section{Partie Raph : Mouvement Brownien Drifté}
 
 Dans cette section, nous étudions le comportement d'un mouvement brownien avec dérive (drift). Cette étape est cruciale car, contrairement au modèle standard, la dérive rompt la symétrie spatiale, ce qui complique le calcul de la loi du maximum.
-\subsection*{Mouvement Brownien avec dérive (drift)}
+\subsection{Mouvement Brownien avec dérive (drift)}
 
 En utilisant le théorème de Girsanov, nous allons voir qu'il est possible de calculer la fonction de densité du maximum :
 \begin{equation}
@@ -61,8 +61,8 @@ Nous retrouvons ainsi l'équation :
 f_{\tilde{X}_T, \tilde{B}_T}(a, b) = \mathbf{1}_{\{a \ge b \wedge 0\}} \frac{1}{T} \sqrt{\frac{2}{\pi T}} (2a - b) e^{\mu b - \frac{(2a - b)^2}{2T} - \frac{\mu^2 T}{2}}
 \end{equation}
 
-\subsection*{Options Barrières}
-\subsubsection*{Cas Général}
+\subsection{Options Barrières}
+\subsubsection{Cas Général}
 En utilisant la densité jointe de $\tilde{B}_T$ et $\tilde{X}_T$, nous sommes capables d'évaluer le prix de n'importe quelle option exotique dont le payoff est de la forme $\phi(\tilde{B}_T, \tilde{X}_T)$, par la formule :
 \begin{equation}
 e^{-r(T-t)} \mathbb{E} \left[ \phi(\tilde{X}_T, \tilde{B}_T) \mid \mathcal{F}_t \right],
@@ -102,7 +102,7 @@ C &= \phi(S_T, M_T)  \\
 &= \phi(S_0 e^{\sigma \tilde{B}_T}, S_0 e^{\sigma \tilde{X}_T}).
 \end{align*}
 
-\subsubsection*{Up-and-out barrier call option}
+\subsubsection{Up-and-out barrier call option}
 
 Considérons une option d'achat (call) up-and-out de maturité $T$, de prix d'exercice $K$, de barrière $B$, et de payoff :
 
@@ -116,7 +116,7 @@ S_T - K & \text{si } \max_{0 \le t \le T} S_t \le B, \\
 
 avec $B > K$. Notre objectif est de prouver le résultat suivant.
 
-Le prix : 
+\paragraph{Proposition 8.1.}Le prix : 
 \begin{equation}
 e^{-r(T-t)} \mathbf{1}_{\{M_t \le B\}} \mathbb{E} \left[ \left( x \frac{S_{T-t}}{S_0} - K \right)^+ \mathbf{1}_{\left\{ x \max_{0 \le \tau \le T-t} S_\tau / S_0 \le B \right\}} \right]_{x=S_t}
 \end{equation}
@@ -133,5 +133,255 @@ e^{-r(T-t)} \mathbb{E} \left[ C \mid \mathcal{F}_t \right]
 \end{align*}
 
 Notez qu'en prenant $B = +\infty$ dans l'identité (9) ci-dessus, on retrouve la formule de Black-Scholes pour le prix d'une option call européenne.
+
+\paragraph{Proof of Proposition 8.1.} We have $C = \phi(S_T, M_T)$ with
+\begin{equation*}
+\phi(x, y) = (x - K)^+ \mathbf{1}_{\{y \le B\}} = \begin{cases} 
+x - K & \text{if } y \le B, \\
+0 & \text{if } y > B,
+\end{cases}
+\end{equation*}
+hence
+\begin{align}
+e^{-r(T-t)} \mathbb{E} \left[ C \mid \mathcal{F}_t \right] &= e^{-r(T-t)} \mathbb{E} \left[ (S_T - K)^+ \mathbf{1}_{\{M_T \le B\}} \mid \mathcal{F}_t \right] \nonumber \\
+&= e^{-r(T-t)} \mathbb{E} \left[ (S_T - K)^+ \mathbf{1}_{\{M_T \le B\}} \mid \mathcal{F}_t \right] \nonumber \\
+&= e^{-r(T-t)} \mathbb{E} \left[ (S_T - K)^+ \mathbf{1}_{\{M_t \le B\}} \mathbf{1}_{\{ \max_{t \le r \le T} S_r \le B \}} \mid \mathcal{F}_t \right] \nonumber \\
+&= e^{-r(T-t)} \mathbf{1}_{\{M_t \le B\}} \mathbb{E} \left[ (S_T - K)^+ \mathbf{1}_{\{ \max_{t \le r \le T} S_r \le B \}} \mid \mathcal{F}_t \right] \nonumber \\
+&= e^{-r(T-t)} \mathbf{1}_{\{M_t \le B\}} \mathbb{E} \left[ \left( x \frac{S_T}{S_t} - K \right)^+ \mathbf{1}_{\{ x \max_{t \le r \le T} S_r / S_t \le B \}} \right]_{x=S_t} \nonumber \\
+&= e^{-r(T-t)} \mathbf{1}_{\{M_t \le B\}} \mathbb{E} \left[ \left( x \frac{S_{T-t}}{S_0} - K \right)^+ \mathbf{1}_{\{ x \max_{0 \le r \le T-t} S_r / S_0 \le B \}} \right]_{x=S_t}.
+\end{align}
+
+En utilisant les changements de variables $\tau = T-t$, $\frac{S_{T-t}}{S_0} = e^{\sigma \tilde{B}_\tau}$ et $\frac{\max S_r}{S_0} = e^{\sigma \tilde{X}_\tau}$, l'expression devient :
+\begin{equation}
+e^{-r\tau} \mathbf{1}_{\{M_t \le B\}} \mathbb{E} \left[ \left( x e^{\sigma \tilde{B}_\tau} - K \right)^+ \mathbf{1}_{\{ \tilde{X}_\tau \le \frac{1}{\sigma} \ln(B/x) \}} \right]_{x=S_t}
+\end{equation}
+L'indicatrice $\mathbf{1}_{\{M_t \le B\}}$ reste à l'extérieur de l'intégrale car elle est mesurable par rapport à la filtration $\mathcal{F}_t$ (le passé est connu). Le changement de variable s'applique uniquement à la partie stochastique future :
+
+En introduisant la densité jointe $f(u, v)$ du couple $(\tilde{B}_\tau, \tilde{X}_\tau)$, on transforme cette espérance en l'intégrale double suivante :
+\begin{equation}
+e^{-r\tau} \mathbf{1}_{\{M_t \le B\}} \int_{-\infty}^{\frac{1}{\sigma} \ln(B/x)} \int_{u \vee 0}^{\frac{1}{\sigma} \ln(B/x)} (x e^{\sigma u} - K)^+ f(u, v) \, dv \, du \Bigg|_{x=S_t}
+\end{equation}
+\begin{align*}
+% Lignes 1 & 2 : L'équation 11 de départ
+& e^{-r\tau} \mathbf{1}_{\{M_t \le B\}} \mathbb{E} \left[ \left( x e^{\sigma \tilde{B}_\tau} - K \right)^+ \mathbf{1}_{\{ x e^{\sigma \tilde{X}_\tau} \le B \}} \right]_{x=S_t} \\
+% Lignes 3 : Passage à l'intégrale double
+&= e^{-r\tau} \mathbf{1}_{\{M_t \le B\}} \Bigg[ \int_{-\infty}^{\infty} \int_{u \vee 0}^{\infty} (x e^{\sigma u} - K)^+ \mathbf{1}_{\{x e^{\sigma v} \le B\}} f(u, v) \, dv \, du \Bigg]_{x=S_t} \\
+% Ligne 4 : Remplacement par la densité explicite et borne sup sur u
+&= \frac{1}{\tau} \sqrt{\frac{2}{\pi\tau}} e^{-r\tau} \mathbf{1}_{\{M_t \le B\}} \Bigg[ \int_{-\infty}^{\sigma^{-1}\log(B/x)} \int_{u \vee 0}^{\infty} (x e^{\sigma u} - K)^+ \mathbf{1}_{\{x e^{\sigma v} \le B\}} \\
+&\qquad \qquad \qquad \qquad \qquad \times (2v - u) e^{-\frac{\mu^2\tau}{2} + \mu u - \frac{(2v-u)^2}{2\tau}} \, dv \, du \Bigg]_{x=S_t} \\
+% Lignes 5 & 6 : Séparation de l'intégrale pour gérer le max(u, 0)
+&= \frac{1}{\tau} e^{-r\tau} \sqrt{\frac{2}{\pi\tau}} \mathbf{1}_{\{M_t \le B\}} \Bigg[ \int_{0}^{\sigma^{-1}\log(B/x)} \int_{u}^{\infty} (x e^{\sigma u} - K)^+ \mathbf{1}_{\{x e^{\sigma v} \le B\}} (2v - u) e^{-\frac{\mu^2\tau}{2} + \mu u - \frac{(2v-u)^2}{2\tau}} \, dv \, du \\
+&\qquad \qquad \qquad + \int_{-\infty}^{0} \int_{0}^{\infty} (x e^{\sigma u} - K)^+ \mathbf{1}_{\{x e^{\sigma v} \le B\}} (2v - u) e^{-\frac{\mu^2\tau}{2} + \mu u - \frac{(2v-u)^2}{2\tau}} \, dv \, du \Bigg]_{x=S_t} \\
+% Lignes 7 & 8 : Simplification de l'indicatrice
+&= \frac{1}{\tau} e^{-r\tau} \sqrt{\frac{2}{\pi\tau}} \mathbf{1}_{\{M_t \le B\}} \Bigg[ \int_{0}^{\sigma^{-1}\log(B/x)} \int_{u}^{\infty} (x e^{\sigma u} - K)^+ \mathbf{1}_{\{v \le \sigma^{-1}\log(B/x)\}} (2v - u) e^{\dots} \, dv \, du \\
+&\qquad \qquad \qquad + \int_{-\infty}^{0} \int_{0}^{\infty} (x e^{\sigma u} - K)^+ \mathbf{1}_{\{v \le \sigma^{-1}\log(B/x)\}} (2v - u) e^{\dots} \, dv \, du \Bigg]_{x=S_t} \\
+% Lignes 9 & 10 : L'indicatrice devient la borne supérieure
+&= \frac{1}{\tau} e^{-r\tau} \sqrt{\frac{2}{\pi\tau}} \mathbf{1}_{\{M_t \le B\}} \Bigg[ \int_{0}^{\sigma^{-1}\log(B/x)} \int_{u}^{\sigma^{-1}\log(B/x)} (x e^{\sigma u} - K)^+ (2v - u) e^{-\frac{\mu^2\tau}{2} + \mu u - \frac{(2v-u)^2}{2\tau}} \, dv \, du \\
+&\qquad \qquad \qquad + \int_{-\infty}^{0} \int_{0}^{\sigma^{-1}\log(B/x)} (x e^{\sigma u} - K)^+ (2v - u) e^{-\frac{\mu^2\tau}{2} + \mu u - \frac{(2v-u)^2}{2\tau}} \, dv \, du \Bigg]_{x=S_t} \\
+% Lignes 11 & 12 : Recombinaison + Borne du Strike
+&= \frac{1}{\tau} e^{-r\tau} \sqrt{\frac{2}{\pi\tau}} \mathbf{1}_{\{M_t \le B\}} \Bigg[ \int_{\sigma^{-1}\log(K/x)}^{\sigma^{-1}\log(B/x)} \int_{u \vee 0}^{\sigma^{-1}\log(B/x)} (x e^{\sigma u} - K) (2v - u) e^{-\frac{\mu^2\tau}{2} + \mu u - \frac{(2v-u)^2}{2\tau}} \, dv \, du \Bigg]_{x=S_t} \\
+% Lignes 13 & 14 : Factorisation pour isoler le terme en v
+&= \frac{1}{\tau} e^{-r\tau - \frac{\mu^2\tau}{2}} \sqrt{\frac{2}{\pi\tau}} \mathbf{1}_{\{M_t \le B\}} \Bigg[ \int_{\sigma^{-1}\log(K/x)}^{\sigma^{-1}\log(B/x)} (x e^{\sigma u} - K) e^{\mu u - \frac{u^2}{2\tau}} \\
+&\qquad \qquad \qquad \qquad \qquad \times \int_{u \vee 0}^{\sigma^{-1}\log(B/x)} (2v - u) e^{\frac{2v(u-v)}{\tau}} \, dv \, du \Bigg]_{x=S_t}
+\end{align*}
+
+Posons, pour simplifier les étapes de calcul : $a = u \vee 0$ et $b = \sigma^{-1}\log(B/x)$. On remarque une intégrale simple a calculer :
+
+\begin{align*}
+\int_a^b (2v - u) e^{\frac{2v(u-v)}{\tau}} \, dv &= \left[ -\frac{\tau}{2} e^{\frac{2v(u-v)}{\tau}} \right]_{v=a}^{v=b} \\
+&= \frac{\tau}{2} \left( e^{\frac{2a(u-a)}{\tau}} - e^{\frac{2b(u-b)}{\tau}} \right) \\
+&= \frac{\tau}{2} \left( e^{\frac{2(u \vee 0)(u - u \vee 0)}{\tau}} - e^{\frac{2b(u-b)}{\tau}} \right) \\
+&= \frac{\tau}{2} \left( 1 - e^{\frac{2b(u-b)}{\tau}} \right),
+\end{align*}
+
+Ainsi, en posant $c = \sigma^{-1} \log(K/x)$, nous obtenons :
+
+\begin{align*}
+\text{Prix}_t &= \mathbf{1}_{\{M_t \le B\}} \Bigg[ e^{-\tau(r+\frac{\mu^2}{2})} \frac{1}{\sqrt{2\pi\tau}} \int_c^b (x e^{\sigma u} - K) e^{\mu u - \frac{u^2}{2\tau}} \left(1 - e^{\frac{2b(u-b)}{\tau}}\right) du \Bigg]_{x=S_t} \\
+&= \mathbf{1}_{\{M_t \le B\}} \Bigg[ x e^{-\tau(r+\frac{\mu^2}{2})} \frac{1}{\sqrt{2\pi\tau}} \int_c^b e^{u(\sigma+\mu) - \frac{u^2}{2\tau}} \left(1 - e^{\frac{2b(u-b)}{\tau}}\right) du \\
+&\qquad \qquad - K e^{-\tau(r+\frac{\mu^2}{2})} \frac{1}{\sqrt{2\pi\tau}} \int_c^b e^{\mu u - \frac{u^2}{2\tau}} \left(1 - e^{\frac{2b(u-b)}{\tau}}\right) du \Bigg]_{x=S_t} \\
+&= \mathbf{1}_{\{M_t \le B\}} \Bigg[ x e^{-\tau(r+\frac{\mu^2}{2})} \frac{1}{\sqrt{2\pi\tau}} \int_c^b e^{u(\sigma+\mu) - \frac{u^2}{2\tau}} \, du \\
+&\qquad \qquad - x e^{-\tau(r+\frac{\mu^2}{2}) - \frac{2b^2}{\tau}} \frac{1}{\sqrt{2\pi\tau}} \int_c^b e^{u(\sigma+\mu+\frac{2b}{\tau}) - \frac{u^2}{2\tau}} \, du \\
+&\qquad \qquad - K e^{-\tau(r+\frac{\mu^2}{2})} \frac{1}{\sqrt{2\pi\tau}} \int_c^b e^{\mu u - \frac{u^2}{2\tau}} \, du \\
+&\qquad \qquad + K e^{-\tau(r+\frac{\mu^2}{2}) - \frac{2b^2}{\tau}} \frac{1}{\sqrt{2\pi\tau}} \int_c^b e^{u(\mu+\frac{2b}{\tau}) - \frac{u^2}{2\tau}} \, du \Bigg]_{x=S_t}
+\end{align*}
+
+En utilisant la relation :
+\begin{equation}
+\frac{1}{\sqrt{2\pi\tau}} \int_c^b e^{\gamma u - \frac{u^2}{2\tau}} \, du = e^{\frac{\gamma^2\tau}{2}} \left( \Phi\left(\frac{-c + \gamma\tau}{\sqrt{\tau}}\right) - \Phi\left(\frac{-b + \gamma\tau}{\sqrt{\tau}}\right) \right),
+\end{equation}
+
+nous trouvons :
+\begin{align*}
+\text{Prix}_t &= \mathbf{1}_{\{M_t \le B\}} \Bigg[ x e^{-\tau(r+\frac{\mu^2}{2}) + \frac{(\sigma+\mu)^2\tau}{2}} \left( \Phi\left(\frac{-c + (\sigma+\mu)\tau}{\sqrt{\tau}}\right) - \Phi\left(\frac{-b + (\sigma+\mu)\tau}{\sqrt{\tau}}\right) \right) \\
+&\qquad \qquad - x e^{-\tau(r+\frac{\mu^2}{2}) - \frac{2b^2}{\tau} + \frac{(\sigma+\mu+\frac{2b}{\tau})^2\tau}{2}} \left( \Phi\left(\frac{-c + (\sigma+\mu+\frac{2b}{\tau})\tau}{\sqrt{\tau}}\right) - \Phi\left(\frac{-b + (\sigma+\mu+\frac{2b}{\tau})\tau}{\sqrt{\tau}}\right) \right) \\
+&\qquad \qquad - K e^{-\tau(r+\frac{\mu^2}{2}) + \frac{\mu^2\tau}{2}} \left( \Phi\left(\frac{-c + \mu\tau}{\sqrt{\tau}}\right) - \Phi\left(\frac{-b + \mu\tau}{\sqrt{\tau}}\right) \right) \\
+&\qquad \qquad + K e^{-\tau(r+\frac{\mu^2}{2}) - \frac{2b^2}{\tau} + \frac{(\mu+\frac{2b}{\tau})^2\tau}{2}} \left( \Phi\left(\frac{-c + (\mu+\frac{2b}{\tau})\tau}{\sqrt{\tau}}\right) - \Phi\left(\frac{-b + (\mu+\frac{2b}{\tau})\tau}{\sqrt{\tau}}\right) \right) \Bigg]_{x=S_t}
+\end{align*}
+
+Pour alléger l'expression, nous introduisons les variables standards de Black-Scholes, définies pour $s > 0$ par :
+\begin{equation}
+\delta_{\pm}^{\tau}(s) = \frac{1}{\sigma\sqrt{\tau}} \left( \log s + \left(r \pm \frac{1}{2}\sigma^2\right)\tau \right).
+\end{equation}
+
+En remplaçant les arguments des fonctions $\Phi$ par ces variables $\delta_{\pm}^{\tau}$ (sachant que $b = \sigma^{-1}\log(B/x)$ et $c = \sigma^{-1}\log(K/x)$), notre expression devient :
+
+\begin{align*}
+e^{-r\tau} \mathbb{E}[C] &= \mathbf{1}_{\{M_t \le B\}} \Bigg[ \\
+&\qquad x \left( \Phi\left(\delta_{+}^{\tau}\left(\frac{x}{K}\right)\right) - \Phi\left(\delta_{+}^{\tau}\left(\frac{x}{B}\right)\right) \right) \\
+&\qquad - x e^{-\tau(r+\mu^2/2) - 2b^2/\tau + (\sigma+\mu+2b/\tau)^2\tau/2} \left( \Phi\left(\delta_{+}^{\tau}\left(\frac{B^2}{Kx}\right)\right) - \Phi\left(\delta_{+}^{\tau}\left(\frac{B}{x}\right)\right) \right) \\
+&\qquad - K e^{-r\tau} \left( \Phi\left(\delta_{-}^{\tau}\left(\frac{x}{K}\right)\right) - \Phi\left(\delta_{-}^{\tau}\left(\frac{x}{B}\right)\right) \right) \\
+&\qquad + K e^{-\tau(r+\mu^2/2) - 2b^2/\tau + (\mu+2b/\tau)^2\tau/2} \left( \Phi\left(\delta_{-}^{\tau}\left(\frac{B^2}{Kx}\right)\right) - \Phi\left(\delta_{-}^{\tau}\left(\frac{B}{x}\right)\right) \right) \Bigg]_{x=S_t}
+\end{align*}
+
+Nous pouvons maintenant simplifier les exposants des facteurs restants. Étant donné les relations suivantes :
+\begin{align*}
+-\tau(r+\mu^2/2) - 2b^2/\tau + (\sigma+\mu+2b/\tau)^2\tau/2 &= 2b(r/\sigma + \sigma/2) = (1 + 2r/\sigma^2)\log(B/x),
+\end{align*}
+et
+\begin{align*}
+-\tau(r+\mu^2/2) - 2b^2/\tau + (\mu+2b/\tau)^2\tau/2 &= -r\tau + 2\mu b = -r\tau + (-1 + 2r/\sigma^2)\log(B/x),
+\end{align*}
+
+l'expression finale se réduit à l'équation (8.8) :
+
+\begin{align}
+e^{-r\tau} \mathbb{E}[C] &= \mathbf{1}_{\{M_t \le B\}} \Bigg[ \nonumber \\
+&\qquad x \left( \Phi\left(\delta_{+}^{\tau}\left(\frac{x}{K}\right)\right) - \Phi\left(\delta_{+}^{\tau}\left(\frac{x}{B}\right)\right) \right) \nonumber \\
+&\qquad - x \left( \frac{B}{x} \right)^{1 + 2r/\sigma^2} \left( \Phi\left(\delta_{+}^{\tau}\left(\frac{B^2}{Kx}\right)\right) - \Phi\left(\delta_{+}^{\tau}\left(\frac{B}{x}\right)\right) \right) \nonumber \\
+&\qquad - e^{-r\tau} K \left( \Phi\left(\delta_{-}^{\tau}\left(\frac{x}{K}\right)\right) - \Phi\left(\delta_{-}^{\tau}\left(\frac{x}{B}\right)\right) \right) \nonumber \\
+&\qquad + e^{-r\tau} K \left( \frac{x}{B} \right)^{1 - 2r/\sigma^2} \left( \Phi\left(\delta_{-}^{\tau}\left(\frac{B^2}{Kx}\right)\right) - \Phi\left(\delta_{-}^{\tau}\left(\frac{B}{x}\right)\right) \right) \Bigg]_{x=S_t}
+\end{align}
+
+L'évaluation de l'intégrale nous a fourni une expression analytique déterministe dépendant du paramètre $x$. En vertu du théorème de substitution pour l'espérance conditionnelle (propriété de Markov du mouvement brownien géométrique), le prix de l'option à l'instant $t$ s'obtient en évaluant cette expression en la variable aléatoire $x = S_t$.
+
+De plus, en rappelant que la durée résiduelle est $\tau = T - t$, nous substituons $x$ par $S_t$ et $\tau$ par $T - t$ dans notre équation. En distribuant l'indicatrice $\mathbf{1}_{\{M_t \le B\}}$ sur les termes en $S_t$ et en $K$, nous retrouvons exactement la formule de prix d'une option Call Up-and-Out (équation 8.1) :
+
+\begin{align}
+e^{-r(T-t)} \mathbb{E} \left[ C \mid \mathcal{F}_t \right] &= S_t \mathbf{1}_{\{M_t \le B\}} \Bigg[ \Phi\left(\delta_{+}^{T-t}\left(\frac{S_t}{K}\right)\right) - \Phi\left(\delta_{+}^{T-t}\left(\frac{S_t}{B}\right)\right) \nonumber \\
+&\qquad - \left( \frac{B}{S_t} \right)^{1 + 2r/\sigma^2} \left( \Phi\left(\delta_{+}^{T-t}\left(\frac{B^2}{K S_t}\right)\right) - \Phi\left(\delta_{+}^{T-t}\left(\frac{B}{S_t}\right)\right) \right) \Bigg] \nonumber \\
+&\quad - e^{-r(T-t)} K \mathbf{1}_{\{M_t \le B\}} \Bigg[ \Phi\left(\delta_{-}^{T-t}\left(\frac{S_t}{K}\right)\right) - \Phi\left(\delta_{-}^{T-t}\left(\frac{S_t}{B}\right)\right) \nonumber \\
+&\qquad - \left( \frac{S_t}{B} \right)^{1 - 2r/\sigma^2} \left( \Phi\left(\delta_{-}^{T-t}\left(\frac{B^2}{K S_t}\right)\right) - \Phi\left(\delta_{-}^{T-t}\left(\frac{B}{S_t}\right)\right) \right) \Bigg].
+\end{align}
+
+La formule analytique obtenue donne le prix exact et instantané d'une option d'achat à barrière désactivante (Call Up-and-Out). Concrètement, elle représente le prix d'un Call standard Black-Scholes auquel on soustrait une "décote" modélisant le risque fatal que l'option s'annule en touchant la barrière. Pour la suite de notre projet, disposer de cette formule fermée est crucial car elle permet une évaluation ultra-rapide de l'option sans recourir à des simulations informatiques lourdes.De plus, ce prix théorique servira de "vérité absolue" (benchmark) pour vérifier et valider la précision de nos futurs algorithmes numériques, comme les méthodes de Monte-Carlo ou les arbres binomiaux. En somme, ce résultat mathématique constitue le socle fondamental sur lequel reposera toute l'implémentation pratique et la gestion des risques de notre produit.
+
+\subsubsection{L'Approche par les Équations aux Dérivées Partielles (EDP)}
+
+Ayant calculé le prix de l'option d'achat (Call) Up-and-Out par des arguments probabilistes, nous cherchons maintenant à dériver une Équation aux Dérivées Partielles (EDP) régissant ce prix.
+
+Le prix de l'option à l'instant $t$ peut s'écrire sous la forme d'une espérance conditionnelle :
+\begin{align*}
+e^{-r(T-t)} \mathbb{E} \left[ (S_T - K)^+ \mathbf{1}_{\{M_T \le B\}} \mid \mathcal{F}_t \right] &= e^{-r(T-t)} \mathbf{1}_{\{ \max_{0 \le r \le t} S_r \le B \}} \mathbb{E} \left[ (S_T - K)^+ \mathbf{1}_{\{ \max_{t \le r \le T} S_r \le B \}} \mid \mathcal{F}_t \right] \\
+&= g(t, S_t, M_t),
+\end{align*}
+où la fonction $g(t, x)$ dépendant du temps $t$ et du sous-jacent $S_t = x$ est donnée par :
+\begin{equation}
+g(t, x, y) = \mathbf{1}_{\{y \le B\}} e^{-r(T-t)} \mathbb{E} \left[ (S_T - K)^+ \mathbf{1}_{\{ \max_{t \le r \le T} S_r \le B \}} \mid S_t = x \right].
+\end{equation}
+
+Pour dériver l'EDP de Black-Scholes satisfaite par $g(t, x)$ correspondant au prix d'un portefeuille auto-financé, nous remarquons d'abord une propriété cruciale : tant que la barrière n'est pas franchie, le prix ne dépend pas dynamiquement du maximum passé. Ainsi :
+\begin{equation}
+\frac{\partial g}{\partial y}(t, x, y) = 0, \qquad \text{pour } 0 < y < B.
+\end{equation}
+
+\textbf{Proposition 8.2.} Soit $(\eta_t, \xi_t)_{t \in \mathbb{R}_+}$ une stratégie de portefeuille telle que :
+\begin{enumerate}
+    \item[(i)] $(\eta_t, \xi_t)_{t \in \mathbb{R}_+}$ est auto-financée,
+    \item[(ii)] la valeur du portefeuille $V_t := \eta_t A_t + \xi_t S_t$, $t \in \mathbb{R}_+$, prend la forme :
+    \begin{equation*}
+    V_t = g(t, S_t, M_t), \qquad t \in \mathbb{R}_+.
+    \end{equation*}
+\end{enumerate}
+
+Alors la fonction $g(t, x, y)$ satisfait l'EDP standard de Black-Scholes :
+\begin{equation}
+r g(t, x, y) = \frac{\partial g}{\partial t}(t, x, y) + r x \frac{\partial g}{\partial x}(t, x, y) + \frac{1}{2} x^2 \sigma^2 \frac{\partial^2 g}{\partial x^2}(t, x, y),
+\end{equation}
+pour $t > 0$, $x > 0$, $0 < y < B$. De plus, la quantité d'actifs risqués à détenir pour se couvrir (le Delta) est donnée par :
+\begin{equation}
+\xi_t = \frac{\partial g}{\partial x}(t, S_t, M_t), \qquad t \in [0, T],
+\end{equation}
+à condition que $M_t < B$.
+
+Dans ce qui suit, puisque la fonction est constante par rapport à $y \in (0, B)$, nous omettrons la variable $y$ et écrirons simplement $g(t, x)$.
+
+Dans la proposition suivante, nous ajoutons les conditions aux limites spécifiques à l'EDP de Black-Scholes afin de couvrir correctement l'option Call Up-and-Out de maturité $T$, de prix d'exercice $K$ et de barrière $B > K$.
+
+\textbf{Proposition 8.3.} Le prix de tout portefeuille auto-financé de la forme $V_t = g(t, S_t)$ couvrant l'option Call à barrière Up-and-Out satisfait le système d'EDP de Black-Scholes suivant :
+\begin{equation}
+\begin{cases}
+r g(t, x) = \frac{\partial g}{\partial t}(t, x) + r x \frac{\partial g}{\partial x}(t, x) + \frac{1}{2} x^2 \sigma^2 \frac{\partial^2 g}{\partial x^2}(t, x), \\[8pt]
+g(t, x) = 0, \qquad x \ge B, \quad t \in [0, T], \\[8pt]
+g(T, x) = (x - K)^+ \mathbf{1}_{\{x < B\}}.
+\end{cases}
+\end{equation}
+Ce système est défini sur le domaine spatio-temporel $[0, T] \times [0, B]$. Il comprend une condition terminale $g(T, x) = (x - K)^+ \mathbf{1}_{\{x < B\}}$ (qui représente le flux de paiement à maturité) et une condition de bord supplémentaire $g(t, B) = 0$, signifiant que le prix de l'option tombe instantanément à zéro dès que le sous-jacent $S_t$ touche la barrière $B$.
+
+La solution analytique fermée (closed-form) pour cette EDP a été démontrée précédemment via l'approche probabiliste. En utilisant la variable $x$ pour dénoter le prix du sous-jacent, la solution s'écrit :
+\begin{align}
+g(t, x) &= x \left( \Phi\left(\delta_{+}^{T-t}\left(\frac{x}{K}\right)\right) - \Phi\left(\delta_{+}^{T-t}\left(\frac{x}{B}\right)\right) \right) \nonumber \\
+&\quad - x \left(\frac{x}{B}\right)^{1 - \frac{2r}{\sigma^2}} \left( \Phi\left(\delta_{+}^{T-t}\left(\frac{B^2}{Kx}\right)\right) - \Phi\left(\delta_{+}^{T-t}\left(\frac{B}{x}\right)\right) \right) \nonumber \\
+&\quad - K e^{-r(T-t)} \left( \Phi\left(\delta_{-}^{T-t}\left(\frac{x}{K}\right)\right) - \Phi\left(\delta_{-}^{T-t}\left(\frac{x}{B}\right)\right) \right) \nonumber \\
+&\quad + K e^{-r(T-t)} \left(\frac{x}{B}\right)^{1 - \frac{2r}{\sigma^2}} \left( \Phi\left(\delta_{-}^{T-t}\left(\frac{B^2}{Kx}\right)\right) - \Phi\left(\delta_{-}^{T-t}\left(\frac{B}{x}\right)\right) \right),
+\end{align}
+pour $0 < x \le B$ et $0 \le t \le T$.
+
+Il est essentiel de souligner que nous n'avons pas eu besoin de résoudre cette Équation aux Dérivées Partielles analytiquement depuis zéro (par exemple via la méthode des images). En effet, en vertu du \textbf{théorème de Feynman-Kac}, l'unique solution de cette EDP de Black-Scholes, soumise à nos conditions terminales et de barrière, correspond très exactement à l'espérance conditionnelle calculée dans la section précédente sous la probabilité risque-neutre. Ainsi, les deux approches : l'approche probabiliste (globale) et l'approche EDP (locale) convergent rigoureusement vers la même formule fermée, validant réciproquement nos résultats.
+
+\subsection*{Vérification des conditions aux limites (Checking the boundary conditions)}
+
+Pour $x = B$, nous vérifions que :
+\begin{align*}
+g(t, B) &= B \left( \Phi\left(\delta_{+}^{T-t}\left(\frac{B}{K}\right)\right) - \Phi\left(\delta_{+}^{T-t}(1)\right) \right) \\
+&\quad - e^{-r(T-t)} K \left( \Phi\left(\delta_{-}^{T-t}\left(\frac{B}{K}\right)\right) - \Phi\left(\delta_{-}^{T-t}(1)\right) \right) \\
+&\quad - B \left( \Phi\left(\delta_{+}^{T-t}\left(\frac{B}{K}\right)\right) - \Phi\left(\delta_{+}^{T-t}(1)\right) \right) \\
+&\quad + e^{-r(T-t)} K \left( \Phi\left(\delta_{-}^{T-t}\left(\frac{B}{K}\right)\right) - \Phi\left(\delta_{-}^{T-t}(1)\right) \right) \\
+&= 0,
+\end{align*}
+et la fonction $g(t, x)$ est étendue à $x > B$ en posant :
+\begin{equation*}
+g(t, x) = 0, \quad x > B.
+\end{equation*}
+
+Pour $x = K$ et $t = T$, nous trouvons :
+\begin{equation*}
+\delta_{\pm}^{0}(s) = -\infty \times \mathbf{1}_{\{s < 1\}} + \infty \times \mathbf{1}_{\{s > 1\}} = 
+\begin{cases} 
++\infty & \text{si } s > 1, \\ 
+0 & \text{si } s = 1, \\ 
+-\infty & \text{si } s < 1, 
+\end{cases}
+\end{equation*}
+par conséquent, lorsque $x < K < B$, nous avons :
+\begin{align*}
+g(T, x) &= x (\Phi(-\infty) - \Phi(-\infty)) \\
+&\quad - K (\Phi(-\infty) - \Phi(-\infty)) \\
+&\quad - B \left( \frac{B}{x} \right)^{2r/\sigma^2} (\Phi(+\infty) - \Phi(+\infty)) \\
+&\quad + K \left( \frac{B}{K} \right)^{2r/\sigma^2} (\Phi(+\infty) - \Phi(+\infty)) \\
+&= 0,
+\end{align*}
+lorsque $K < x < B$, nous obtenons :
+\begin{align*}
+g(T, x) &= x (\Phi(+\infty) - \Phi(-\infty)) \\
+&\quad - K (\Phi(+\infty) - \Phi(-\infty)) \\
+&\quad - B \left( \frac{B}{x} \right)^{2r/\sigma^2} (\Phi(+\infty) - \Phi(+\infty)) \\
+&\quad + K \left( \frac{B}{K} \right)^{2r/\sigma^2} (\Phi(+\infty) - \Phi(+\infty)) \\
+&= x - K,
+\end{align*}
+et pour $x > B$, nous obtenons :
+\begin{align*}
+g(T, x) &= x (\Phi(+\infty) - \Phi(+\infty)) \\
+&\quad - K (\Phi(+\infty) - \Phi(+\infty)) \\
+&\quad - B \left( \frac{B}{x} \right)^{2r/\sigma^2} (\Phi(-\infty) - \Phi(-\infty)) \\
+&\quad + K \left( \frac{B}{K} \right)^{2r/\sigma^2} (\Phi(-\infty) - \Phi(-\infty)) \\
+&= 0.
+\end{align*}
+
+\subsubsection*{Conclusion : Enjeux de la méthode EDP en Finance}
+
+L'approche par Équation aux Dérivées Partielles (EDP) ne sert pas uniquement à calculer un prix, mais à modéliser la \textbf{gestion dynamique} du risque. Alors que la méthode probabiliste donne une vision globale à l'échéance, l'EDP de Black-Scholes décrit comment le prix de l'option doit évoluer localement pour rester cohérent avec le marché. 
+
+Concrètement, la formule issue de l'EDP permet au trader de déterminer son \textbf{Delta} ($\xi_t = \frac{\partial g}{\partial x}$), c'est-à-dire la quantité précise d'actions à détenir pour protéger la banque contre les variations du sous-jacent. Les conditions aux limites ($g=0$ en $B$) ne sont pas de simples contraintes : elles forcent le modèle à anticiper la désactivation brutale du contrat, évitant ainsi des erreurs de couverture fatales lors d'un franchissement de barrière. En somme, cette méthode réconcilie mathématiques pures et réalité opérationnelle, garantissant la viabilité du système financier.
 
 \end{document}
